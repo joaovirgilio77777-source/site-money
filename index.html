@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Criar Currículo Online Grátis | Gerar PDF Rápido</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+:root{
+--bg:#f4f6f8;
+--card:#ffffff;
+--text:#111;
+--sub:#666;
+}
+
+.dark{
+--bg:#111;
+--card:#1c1c1c;
+--text:#fff;
+--sub:#aaa;
+}
+
+body{
+margin:0;
+font-family:'Inter',sans-serif;
+background:var(--bg);
+color:var(--text);
+padding:20px;
+}
+
+.container{
+max-width:1100px;
+margin:auto;
+}
+
+.top{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+}
+
+button{
+padding:10px 15px;
+border:none;
+border-radius:8px;
+background:#111;
+color:white;
+cursor:pointer;
+font-weight:600;
+}
+
+.dark button{
+background:#fff;
+color:#111;
+}
+
+input, textarea{
+width:100%;
+padding:10px;
+margin-bottom:10px;
+border-radius:8px;
+border:1px solid #ccc;
+}
+
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:20px;
+}
+
+.card{
+background:var(--card);
+padding:20px;
+border-radius:12px;
+box-shadow:0 5px 15px rgba(0,0,0,0.05);
+}
+
+.preview{
+margin-top:30px;
+background:var(--card);
+padding:30px;
+border-radius:12px;
+}
+
+.tags{
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+}
+
+.tag{
+background:#007bff;
+color:white;
+padding:5px 10px;
+border-radius:20px;
+font-size:12px;
+}
+
+.bar{
+height:10px;
+background:#ddd;
+border-radius:10px;
+overflow:hidden;
+margin-top:10px;
+}
+
+.fill{
+height:100%;
+background:#28a745;
+width:0%;
+transition:0.3s;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="top">
+<h2>Criar Currículo Online Grátis | Gerar PDF Rápido</h2>
+<button onclick="toggleDark()">🌙 Tema</button>
+</div>
+
+<div class="grid">
+
+<div class="card">
+<h3>Informações</h3>
+<input id="nome" placeholder="Nome">
+<input id="profissao" placeholder="Profissão">
+<input id="telefone" placeholder="Telefone">
+<input id="email" placeholder="Email">
+<textarea id="objetivo" placeholder="Objetivo"></textarea>
+<button onclick="melhorarObjetivo()">Melhorar Objetivo</button>
+
+<h4>Habilidades</h4>
+<input id="habilidadeInput" placeholder="Digite e aperte Enter">
+<div class="tags" id="tags"></div>
+
+<h4>Qualidade</h4>
+<div class="bar"><div class="fill" id="fill"></div></div>
+<p id="scoreText"></p>
+
+<button onclick="baixarPDF()">Baixar PDF</button>
+</div>
+
+<div class="card">
+<h3>Experiência</h3>
+<textarea id="experiencia"></textarea>
+
+<h3>Formação</h3>
+<textarea id="formacao"></textarea>
+
+<h3>Idiomas</h3>
+<textarea id="idiomas"></textarea>
+</div>
+
+</div>
+
+<div class="preview" id="preview"></div>
+
+</div>
+
+<script>
+
+let habilidades = [];
+
+function salvar(){
+localStorage.setItem("curriculoData", JSON.stringify({
+nome:nome.value,
+profissao:profissao.value,
+telefone:telefone.value,
+email:email.value,
+objetivo:objetivo.value,
+experiencia:experiencia.value,
+formacao:formacao.value,
+idiomas:idiomas.value,
+habilidades
+}));
+}
+
+function carregar(){
+let data = JSON.parse(localStorage.getItem("curriculoData"));
+if(!data) return;
+Object.keys(data).forEach(k=>{
+if(document.getElementById(k)) document.getElementById(k).value=data[k];
+});
+habilidades = data.habilidades || [];
+renderTags();
+}
+
+function renderTags(){
+tags.innerHTML="";
+habilidades.forEach(h=>{
+let span=document.createElement("div");
+span.className="tag";
+span.innerText=h;
+tags.appendChild(span);
+});
+}
+
+habilidadeInput.addEventListener("keypress",e=>{
+if(e.key==="Enter"){
+e.preventDefault();
+habilidades.push(habilidadeInput.value);
+habilidadeInput.value="";
+renderTags();
+updateScore();
+salvar();
+}
+});
+
+function melhorarObjetivo(){
+if(objetivo.value.length<5) return;
+objetivo.value="Profissional dedicado com foco em resultados, crescimento contínuo e contribuição estratégica para a empresa.";
+updateScore();
+salvar();
+}
+
+function updateScore(){
+let score=0;
+if(nome.value.length>3) score+=15;
+if(objetivo.value.length>20) score+=20;
+if(experiencia.value.length>30) score+=25;
+if(formacao.value.length>10) score+=15;
+if(habilidades.length>=3) score+=15;
+if(email.value.includes("@")) score+=10;
+
+fill.style.width=score+"%";
+scoreText.innerText="Qualidade: "+score+"%";
+
+gerarPreview();
+}
+
+function gerarPreview(){
+preview.innerHTML=`
+<h2>${nome.value}</h2>
+<p>${profissao.value}</p>
+<p>${telefone.value} | ${email.value}</p>
+<hr>
+<h4>Objetivo</h4><p>${objetivo.value}</p>
+<h4>Experiência</h4><p>${experiencia.value}</p>
+<h4>Formação</h4><p>${formacao.value}</p>
+<h4>Habilidades</h4><p>${habilidades.join(", ")}</p>
+<h4>Idiomas</h4><p>${idiomas.value}</p>
+`;
+}
+
+function toggleDark(){
+document.body.classList.toggle("dark");
+}
+
+function baixarPDF(){
+const { jsPDF } = window.jspdf;
+const doc=new jsPDF();
+let y=20;
+
+doc.setFontSize(16);
+doc.text(nome.value,20,y);
+y+=10;
+doc.setFontSize(12);
+doc.text(profissao.value,20,y);
+y+=15;
+
+function bloco(titulo,texto){
+doc.text(titulo,20,y);
+y+=7;
+let linhas=doc.splitTextToSize(texto,170);
+doc.text(linhas,20,y);
+y+=linhas.length*7+5;
+}
+
+bloco("Contato:", telefone.value+" | "+email.value);
+bloco("Objetivo:", objetivo.value);
+bloco("Experiência:", experiencia.value);
+bloco("Formação:", formacao.value);
+bloco("Habilidades:", habilidades.join(", "));
+bloco("Idiomas:", idiomas.value);
+
+doc.save("curriculo.pdf");
+}
+
+document.querySelectorAll("input,textarea").forEach(el=>{
+el.addEventListener("input", ()=>{
+updateScore();
+salvar();
+});
+});
+
+carregar();
+updateScore();
+
+</script>
+
+</body>
+</html>
